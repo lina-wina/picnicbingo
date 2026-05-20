@@ -458,6 +458,83 @@
       animation: pop .35s ease both;
     }
 
+    .full-board {
+      display: none;
+      position: relative;
+      margin-top: 16px;
+      padding: clamp(18px, 4vw, 30px);
+      border-radius: 28px;
+      overflow: hidden;
+      text-align: center;
+      color: #533846;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255,255,255,.86), transparent 18%),
+        radial-gradient(circle at 82% 24%, rgba(220, 247, 236, .9), transparent 22%),
+        linear-gradient(135deg, rgba(255, 220, 232, .98), rgba(255, 240, 183, .98) 48%, rgba(217, 204, 255, .98));
+      border: 2px solid rgba(255,255,255,.96);
+      box-shadow: 0 18px 44px rgba(87, 66, 77, .18);
+      isolation: isolate;
+    }
+
+    .full-board::before,
+    .full-board::after {
+      content: "";
+      position: absolute;
+      inset: -35%;
+      z-index: -1;
+      background:
+        conic-gradient(from 0deg, transparent 0 18deg, rgba(255,255,255,.72) 18deg 24deg, transparent 24deg 44deg);
+      animation: prizeSpin 8s linear infinite;
+      opacity: .55;
+    }
+
+    .full-board::after {
+      animation-duration: 12s;
+      animation-direction: reverse;
+      opacity: .3;
+    }
+
+    .full-board.show {
+      display: block;
+      animation: pop .42s ease both;
+    }
+
+    .full-board-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 13px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(255,255,255,.96);
+      box-shadow: 0 8px 18px rgba(87, 66, 77, .12);
+      color: #7a4860;
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .full-board h2 {
+      margin: 12px 0 8px;
+      font-size: clamp(25px, 6vw, 46px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .full-board p {
+      width: min(620px, 100%);
+      margin: 0 auto;
+      color: #674f5b;
+      font-size: clamp(15px, 2.4vw, 19px);
+      line-height: 1.35;
+      font-weight: 750;
+    }
+
+    @keyframes prizeSpin {
+      to { transform: rotate(360deg); }
+    }
+
     @keyframes pop {
       from { opacity: 0; transform: scale(.94) translateY(6px); }
       to { opacity: 1; transform: scale(1) translateY(0); }
@@ -696,6 +773,15 @@
         border-radius: 18px;
       }
 
+      .full-board {
+        border-radius: 20px;
+        padding: 16px 12px;
+      }
+
+      .full-board-badge {
+        font-size: 11px;
+      }
+
       .toast {
         max-width: calc(100% - 24px);
         white-space: normal;
@@ -746,7 +832,10 @@
     @media (prefers-reduced-motion: reduce) {
       .petal,
       .floating,
-      .winner.show {
+      .winner.show,
+      .full-board.show,
+      .full-board::before,
+      .full-board::after {
         animation: none;
       }
 
@@ -838,6 +927,12 @@
     <img id="winnerImage" src="" alt="Winner Celebration" style="display: none; margin-top: 10px; max-width: 100%; border-radius: 12px;" />
     </section>
 
+    <section id="fullBoard" class="full-board" aria-live="polite">
+      <div class="full-board-badge">Full Board</div>
+      <h2>Picnic Legend Unlocked</h2>
+      <p>Every square is checked. You get maximum bragging rights, a dramatic victory moment, and whatever prize the picnic council approves.</p>
+    </section>
+
     <section class="rules" aria-label="How to play">
       <div class="rule">
         <strong>🌷 How to play</strong>
@@ -918,6 +1013,7 @@
     const printBtn = document.getElementById("printBtn");
     const statusText = document.getElementById("statusText");
     const winner = document.getElementById("winner");
+    const fullBoard = document.getElementById("fullBoard");
     const toast = document.getElementById("toast");
 
     let currentName = "Micah's Friend";
@@ -1046,12 +1142,19 @@
       ];
 
       const hasBingo = lines.some(line => line.every(i => checked.has(i)));
+      const isFullBoard = board.length === 25 && board.every((_, i) => checked.has(i));
       winner.classList.toggle("show", hasBingo);
+      fullBoard.classList.toggle("show", isFullBoard);
 
       const count = [...checked].filter(i => i !== 12).length;
-      statusText.textContent = `${currentName}'s board · ${count}/24 squares checked`;
+      statusText.textContent = isFullBoard
+        ? `${currentName}'s board · FULL BOARD!`
+        : `${currentName}'s board · ${count}/24 squares checked`;
 
-      if (hasBingo && announce) {
+      if (isFullBoard && announce) {
+        fullBoardCelebration();
+        showToast("FULL BOARD! Picnic Legend unlocked ✨");
+      } else if (hasBingo && announce) {
         confetti();
         showToast("BINGO! Main Character of the Picnic ✨");
 
@@ -1060,6 +1163,12 @@
         winnerImage.src = "D1581512-A69D-4BE8-8CC8-F22959443C1F.png"; // Add the correct image path here
         winnerImage.style.display = "block";
       }
+    }
+
+    function fullBoardCelebration() {
+      confetti(96, 1800);
+      setTimeout(() => confetti(72, 1700), 260);
+      setTimeout(() => petalBurst(), 120);
     }
 
     function generate(name, updateUrl = true) {
@@ -1107,9 +1216,9 @@
       setTimeout(() => toast.classList.remove("show"), 1800);
     }
 
-    function confetti() {
+    function confetti(total = 54, lifetime = 1500) {
       const colors = ["#ffdce8", "#fff0b7", "#d9ccff", "#dcf7ec", "#dff1ff", "#e99ab8"];
-      for (let i = 0; i < 54; i++) {
+      for (let i = 0; i < total; i++) {
         const piece = document.createElement("div");
         piece.className = "confetti";
         piece.style.left = Math.random() * 100 + "vw";
@@ -1117,7 +1226,28 @@
         piece.style.animationDelay = Math.random() * .25 + "s";
         piece.style.transform = `rotate(${Math.random() * 180}deg)`;
         document.body.appendChild(piece);
-        setTimeout(() => piece.remove(), 1500);
+        setTimeout(() => piece.remove(), lifetime);
+      }
+    }
+
+    function petalBurst() {
+      const petals = document.querySelector(".petals");
+      if (!petals || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      for (let i = 0; i < 18; i++) {
+        const petal = document.createElement("span");
+        petal.className = "petal";
+        petal.style.setProperty("--left", Math.random() * 100 + "%");
+        petal.style.setProperty("--size", 10 + Math.random() * 10 + "px");
+        petal.style.setProperty("--mobile-size", 8 + Math.random() * 4 + "px");
+        petal.style.setProperty("--sway", (Math.random() > .5 ? 1 : -1) * (18 + Math.random() * 28) + "vw");
+        petal.style.setProperty("--duration", 4 + Math.random() * 2 + "s");
+        petal.style.setProperty("--delay", "0s");
+        petal.style.setProperty("--opacity", ".72");
+        petal.style.setProperty("--petal-a", "#fff1b8");
+        petal.style.setProperty("--petal-b", Math.random() > .5 ? "#ffabc7" : "#d9ccff");
+        petals.appendChild(petal);
+        setTimeout(() => petal.remove(), 6500);
       }
     }
 
