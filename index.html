@@ -978,9 +978,6 @@
       if (e.key === "Enter") generate(nameInput.value);
     });
 
-    const params = new URLSearchParams(window.location.search);
-    const paramName = params.get("name");
-    generate(paramName || "Picnic Friend", !paramName);
   </script>
 </body>
 </html>
