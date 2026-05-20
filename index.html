@@ -73,6 +73,52 @@
       mask-image: linear-gradient(to bottom, transparent, black 20%, black 78%, transparent);
     }
 
+    .petals {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .petal {
+      display: block;
+      position: absolute;
+      top: -12vh;
+      left: var(--left);
+      width: var(--size);
+      aspect-ratio: 1 / 1.35;
+      border-radius: 75% 20% 75% 20%;
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255,255,255,.8), transparent 35%),
+        linear-gradient(135deg, var(--petal-a), var(--petal-b));
+      box-shadow: 0 8px 18px rgba(118, 78, 96, .14);
+      opacity: var(--opacity);
+      animation: petalFall var(--duration) linear infinite;
+      animation-delay: var(--delay);
+      transform-origin: 50% 100%;
+    }
+
+    .petal:nth-child(3n) {
+      border-radius: 20% 75% 20% 75%;
+    }
+
+    .petal:nth-child(4n) {
+      filter: blur(.2px);
+    }
+
+    @keyframes petalFall {
+      0% {
+        transform: translate3d(0, -14vh, 0) rotate(0deg);
+      }
+      45% {
+        transform: translate3d(var(--sway), 48vh, 0) rotate(160deg);
+      }
+      100% {
+        transform: translate3d(0, 114vh, 0) rotate(390deg);
+      }
+    }
+
     .floating {
       position: fixed;
       font-size: clamp(30px, 5vw, 58px);
@@ -651,6 +697,11 @@
         white-space: normal;
         text-align: center;
       }
+
+      .petal {
+        --size: var(--mobile-size);
+        opacity: .36;
+      }
     }
 
     @media (max-width: 390px) {
@@ -688,11 +739,23 @@
       }
     }
 
+    @media (prefers-reduced-motion: reduce) {
+      .petal,
+      .floating,
+      .winner.show {
+        animation: none;
+      }
+
+      .petals {
+        display: none;
+      }
+    }
+
     @media print {
       body {
         background: #fff;
       }
-      .gingham, .floating, .panel, .rules, .toast {
+      .gingham, .petals, .floating, .panel, .rules, .toast {
         display: none !important;
       }
       .wrap {
@@ -712,6 +775,21 @@
 </head>
 <body>
   <div class="gingham"></div>
+  <div class="petals" aria-hidden="true">
+    <span class="petal" style="--left: 4%; --size: 13px; --mobile-size: 8px; --sway: 34vw; --duration: 16s; --delay: -7s; --opacity: .6; --petal-a: #ffd3e1; --petal-b: #f3a5c0;"></span>
+    <span class="petal" style="--left: 12%; --size: 9px; --mobile-size: 7px; --sway: 22vw; --duration: 13s; --delay: -2s; --opacity: .46; --petal-a: #fff1b8; --petal-b: #ffc7dc;"></span>
+    <span class="petal" style="--left: 19%; --size: 15px; --mobile-size: 9px; --sway: -26vw; --duration: 18s; --delay: -11s; --opacity: .5; --petal-a: #f6dcff; --petal-b: #d9ccff;"></span>
+    <span class="petal" style="--left: 27%; --size: 10px; --mobile-size: 7px; --sway: 30vw; --duration: 14s; --delay: -4s; --opacity: .56; --petal-a: #ffdce8; --petal-b: #ffb4cd;"></span>
+    <span class="petal" style="--left: 34%; --size: 12px; --mobile-size: 8px; --sway: -20vw; --duration: 17s; --delay: -9s; --opacity: .48; --petal-a: #dcf7ec; --petal-b: #aee8d0;"></span>
+    <span class="petal" style="--left: 42%; --size: 8px; --mobile-size: 7px; --sway: 18vw; --duration: 12s; --delay: -5s; --opacity: .55; --petal-a: #dff1ff; --petal-b: #afd9f5;"></span>
+    <span class="petal" style="--left: 49%; --size: 14px; --mobile-size: 9px; --sway: -32vw; --duration: 19s; --delay: -13s; --opacity: .45; --petal-a: #ffe2ec; --petal-b: #e99ab8;"></span>
+    <span class="petal" style="--left: 57%; --size: 10px; --mobile-size: 7px; --sway: 26vw; --duration: 15s; --delay: -1s; --opacity: .5; --petal-a: #fff6dc; --petal-b: #ffdce8;"></span>
+    <span class="petal" style="--left: 64%; --size: 16px; --mobile-size: 9px; --sway: -24vw; --duration: 20s; --delay: -15s; --opacity: .43; --petal-a: #f4f0ff; --petal-b: #cfc1ff;"></span>
+    <span class="petal" style="--left: 71%; --size: 9px; --mobile-size: 7px; --sway: 19vw; --duration: 13s; --delay: -8s; --opacity: .58; --petal-a: #ffd3e1; --petal-b: #ffabc7;"></span>
+    <span class="petal" style="--left: 78%; --size: 12px; --mobile-size: 8px; --sway: -30vw; --duration: 16s; --delay: -3s; --opacity: .47; --petal-a: #dcf7ec; --petal-b: #b9efd9;"></span>
+    <span class="petal" style="--left: 86%; --size: 11px; --mobile-size: 8px; --sway: 21vw; --duration: 14s; --delay: -10s; --opacity: .54; --petal-a: #fff0b7; --petal-b: #ffd1e0;"></span>
+    <span class="petal" style="--left: 94%; --size: 15px; --mobile-size: 9px; --sway: -36vw; --duration: 21s; --delay: -16s; --opacity: .42; --petal-a: #ffdce8; --petal-b: #f0a1bf;"></span>
+  </div>
   <div class="floating float-1">🐈‍⬛</div>
   <div class="floating float-2">🧺</div>
   <div class="floating float-3">🎲</div>
