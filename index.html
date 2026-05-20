@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title> Picnic Bingo </title>
+  <style>
+    :root {
+      --cream: #fffaf2;
+      --cream2: #fff6dc;
+      --blush: #ffdce8;
+      --blush2: #ffeff5;
+      --rose: #e99ab8;
+      --lavender: #d9ccff;
+      --mint: #dcf7ec;
+      --butter: #fff0b7;
+      --sky: #dff1ff;
+      --ink: #493d44;
+      --muted: #7b6a73;
+      --white: rgba(255,255,255,.78);
+      --shadow: rgba(87, 66, 77, .18);
+      --checked: #c9f6df;
+      --checked-text: #236242;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      font-family: Garamond, "EB Garamond", "Cormorant Garamond", Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 12%, rgba(255, 220, 232, .8), transparent 27%),
+        radial-gradient(circle at 92% 10%, rgba(223, 241, 255, .9), transparent 25%),
+        radial-gradient(circle at 18% 92%, rgba(220, 247, 236, .85), transparent 28%),
+        radial-gradient(circle at 84% 88%, rgba(255, 240, 183, .75), transparent 26%),
+        linear-gradient(135deg, #fffaf2, #fff0f7 48%, #f4f0ff);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .14;
+      background-image:
+        radial-gradient(circle, #5c4653 1.1px, transparent 1.5px),
+        radial-gradient(circle, #5c4653 1px, transparent 1.5px);
+      background-position: 0 0, 18px 18px;
+      background-size: 36px 36px;
+      z-index: -2;
+    }
+
+    .gingham {
+      position: fixed;
+      inset: 0;
+      opacity: .13;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 32px, rgba(255, 145, 177, .45) 32px 64px),
+        repeating-linear-gradient(90deg, transparent 0 32px, rgba(255, 145, 177, .45) 32px 64px);
+      z-index: -1;
+      mask-image: linear-gradient(to bottom, transparent, black 20%, black 78%, transparent);
+    }
+
+    .floating {
+      position: fixed;
+      font-size: clamp(30px, 5vw, 58px);
+      filter: drop-shadow(0 10px 12px rgba(80, 60, 70, .12));
+      opacity: .58;
+      pointer-events: none;
+      z-index: 0;
+      animation: floaty 5.2s ease-in-out infinite;
+    }
+
+    .float-1 { left: 10px; bottom: 18px; transform: rotate(-9deg); animation-delay: -.5s; }
+    .float-2 { right: 10px; top: 72px; transform: rotate(10deg); animation-delay: -1.8s; }
+    .float-3 { left: 18px; top: 112px; font-size: clamp(24px, 4vw, 44px); animation-delay: -3s; }
+    .float-4 { right: 18px; bottom: 82px; font-size: clamp(24px, 4vw, 46px); animation-delay: -4s; }
+
+    @keyframes floaty {
+      0%, 100% { translate: 0 0; }
+      50% { translate: 0 -12px; }
+    }
+
+    .wrap {
+      width: min(1080px, calc(100vw - 24px));
+      margin: 0 auto;
+      padding: 22px 0 44px;
+      position: relative;
+      z-index: 2;
+    }
+
+    header {
+      text-align: center;
+      padding: 14px 0 8px;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.7);
+      border: 1px solid rgba(255,255,255,.95);
+      box-shadow: 0 10px 30px var(--shadow);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .02em;
+    }
+
+    h1 {
+      margin: 14px 0 0;
+      font-family: Garamond, "EB Garamond", "Cormorant Garamond", Georgia, "Times New Roman", serif;
+      font-weight: 700;
+      font-size: clamp(34px, 7vw, 82px);
+      line-height: .88;
+      letter-spacing: -.06em;
+      color: #5e4754;
+      text-shadow: 0 4px 0 rgba(255,255,255,.55);
+    }
+
+    .subtitle {
+      width: min(760px, 100%);
+      margin: 16px auto 0;
+      color: var(--muted);
+      font-size: clamp(15px, 2vw, 20px);
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .hero-emojis {
+      font-size: clamp(30px, 6vw, 68px);
+      margin-top: 8px;
+      line-height: 1;
+      filter: drop-shadow(0 8px 14px rgba(92,72,86,.14));
+    }
+
+    .panel {
+      margin: 18px auto 18px;
+      padding: clamp(12px, 2vw, 20px);
+      border-radius: 28px;
+      background: rgba(255,255,255,.72);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,.95);
+      box-shadow: 0 20px 58px var(--shadow);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    label {
+      display: block;
+      padding-left: 5px;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      border: 2px solid rgba(204, 155, 180, .55);
+      background: rgba(255,255,255,.82);
+      color: var(--ink);
+      border-radius: 18px;
+      padding: 13px 14px;
+      font-size: 16px;
+      font-weight: 600;
+      outline: none;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.85);
+    }
+
+    input:focus {
+      border-color: var(--rose);
+      box-shadow: 0 0 0 5px rgba(233, 154, 184, .22);
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 18px;
+      padding: 14px 16px;
+      min-height: 50px;
+      color: var(--ink);
+      background: linear-gradient(135deg, var(--butter), var(--blush));
+      box-shadow: 0 11px 22px rgba(87, 66, 77, .17);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 28px rgba(87, 66, 77, .22);
+      filter: saturate(1.03);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.secondary {
+      background: linear-gradient(135deg, var(--mint), var(--sky));
+    }
+
+    button.ghost {
+      min-height: 0;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(255,255,255,.95);
+      box-shadow: none;
+      font-size: 13px;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      color: var(--muted);
+      font-weight: 850;
+      line-height: 1.35;
+    }
+
+    .status-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .card-shell {
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      padding: clamp(8px, 1.6vw, 22px);
+      border-radius: 34px;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.08) 49%, rgba(255,255,255,.42) 50%, rgba(255,255,255,.08) 51%),
+        linear-gradient(rgba(255,255,255,.08) 49%, rgba(255,255,255,.42) 50%, rgba(255,255,255,.08) 51%),
+        rgba(255,255,255,.58);
+      background-size: 46px 46px;
+      border: 2px solid rgba(255,255,255,.95);
+      box-shadow: 0 24px 70px var(--shadow);
+      overflow: visible;
+    }
+
+    .card-shell::before {
+      content: "🐾  🧺  🍓  🐈‍⬛  🥪  🎲  🌷  ☁️";
+      position: absolute;
+      top: 8px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 22px;
+      letter-spacing: .4em;
+      opacity: .55;
+      pointer-events: none;
+    }
+
+    .bingo-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: clamp(5px, 1.1vw, 12px);
+      position: relative;
+      z-index: 1;
+      margin-top: 30px;
+      width: 100%;
+      max-width: 100%;
+      overflow: visible;
+    }
+
+    .head-cell {
+      min-width: 0;
+      min-height: clamp(42px, 8vw, 62px);
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-size: clamp(20px, 4vw, 36px);
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffd8e8, #fff1b8);
+      border: 2px solid rgba(191, 142, 165, .55);
+      color: #5e4754;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.9);
+    }
+
+    .square {
+      min-width: 0;
+      width: 100%;
+      min-height: clamp(78px, 14vw, 142px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(5px, 1.5vw, 10px);
+      border-radius: 22px;
+      border: 2px solid rgba(200, 155, 179, .64);
+      background: rgba(255,255,255,.76);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.95), 0 8px 20px rgba(87, 66, 77, .11);
+      text-align: center;
+      color: var(--ink);
+      line-height: 1.08;
+      font-size: clamp(10.5px, 2.25vw, 16px);
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease, color .12s ease;
+
+      /* IMPORTANT: prevents mobile overflow from long bingo text */
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      hyphens: auto;
+    }
+
+    .square:hover {
+      transform: translateY(-2px) rotate(-.2deg);
+    }
+
+    .square:nth-child(5n+1) { background: #fff3f8; }
+    .square:nth-child(5n+2) { background: #fff8df; }
+    .square:nth-child(5n+3) { background: #f4f0ff; }
+    .square:nth-child(5n+4) { background: #effbf6; }
+    .square:nth-child(5n+5) { background: #eef8ff; }
+
+    .square.checked {
+      background: url('D1581512-A69D-4BE8-8CC8-F22959443C1F.png');
+      background-size: cover; /* Ensure the image fully covers the square */
+      background-position: center; /* Center the image */
+      background-repeat: no-repeat;
+      border-color: #71bf93;
+      color: var(--checked-text);
+    }
+
+    .square.checked::after {
+      content: "✓";
+      position: absolute;
+      top: 7px;
+      right: 8px;
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: white;
+      background: #65b886;
+      box-shadow: 0 5px 12px rgba(76, 135, 96, .25);
+      font-weight: 700;
+      font-size: 17px;
+    }
+
+    .square.free {
+      background: linear-gradient(135deg, #ffdce8, #fff1b8) !important;
+      border-color: #cf8eab;
+    }
+
+    .winner {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 24px;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(255, 220, 232, .96), rgba(220, 247, 236, .96));
+      border: 2px solid rgba(255,255,255,.95);
+      box-shadow: 0 14px 32px rgba(87, 66, 77, .14);
+      font-size: clamp(17px, 3vw, 22px);
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .winner.show {
+      display: block;
+      animation: pop .35s ease both;
+    }
+
+    @keyframes pop {
+      from { opacity: 0; transform: scale(.94) translateY(6px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .rules {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .rule {
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.6);
+      border: 1px solid rgba(255,255,255,.95);
+      box-shadow: 0 11px 26px rgba(87, 66, 77, .1);
+    }
+
+    .rule strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 16px;
+    }
+
+    .rule span {
+      display: block;
+      color: var(--muted);
+      line-height: 1.36;
+      font-weight: 700;
+    }
+
+    footer {
+      margin-top: 22px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      translate: -50% 20px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 20;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.98);
+      box-shadow: 0 14px 34px rgba(87,66,77,.2);
+      color: var(--ink);
+      font-weight: 700;
+      transition: all .25s ease;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      translate: -50% 0;
+    }
+
+    .confetti {
+      position: fixed;
+      top: -20px;
+      width: 10px;
+      height: 16px;
+      border-radius: 3px;
+      z-index: 30;
+      animation: fall 1.2s linear forwards;
+    }
+
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    @media (max-width: 820px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .controls button {
+        width: 100%;
+      }
+
+      .rules {
+        grid-template-columns: 1fr;
+      }
+
+      .floating {
+        opacity: .25;
+      }
+    }
+
+    @media (max-width: 540px) {
+      .wrap {
+        width: calc(100vw - 10px);
+        padding-top: 8px;
+      }
+
+      header {
+        padding-top: 6px;
+      }
+
+      .kicker {
+        font-size: 12px;
+        padding: 7px 10px;
+      }
+
+      h1 {
+        font-size: clamp(31px, 12vw, 48px);
+      }
+
+      .subtitle {
+        font-size: 13px;
+        margin-top: 10px;
+      }
+
+      .hero-emojis {
+        font-size: 29px;
+      }
+
+      .panel {
+        border-radius: 20px;
+        padding: 10px;
+        margin: 12px auto;
+      }
+
+      input {
+        border-radius: 14px;
+        padding: 11px 12px;
+        font-size: 14px;
+      }
+
+      button {
+        border-radius: 14px;
+        min-height: 44px;
+        padding: 11px 12px;
+        font-size: 14px;
+      }
+
+      .status-row {
+        font-size: 12px;
+        gap: 8px;
+      }
+
+      .status-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+
+      button.ghost {
+        width: 100%;
+        padding: 8px 5px;
+        font-size: 11px;
+      }
+
+      .card-shell {
+        border-radius: 20px;
+        padding: 5px;
+        border-width: 1.5px;
+        overflow: visible;
+      }
+
+      .card-shell::before {
+        font-size: 15px;
+        letter-spacing: .18em;
+        top: 7px;
+      }
+
+      .bingo-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 4px;
+        margin-top: 25px;
+      }
+
+      .head-cell {
+        border-radius: 11px;
+        min-height: 34px;
+        font-size: 18px;
+        border-width: 1.5px;
+      }
+
+      .square {
+        min-height: 74px;
+        border-radius: 11px;
+        padding: 5px 3px;
+        font-size: clamp(9px, 2.85vw, 11px);
+        line-height: 1.02;
+        letter-spacing: -0.02em;
+        border-width: 1.3px;
+      }
+
+      .square.checked::after {
+        width: 18px;
+        height: 18px;
+        font-size: 12px;
+        top: 4px;
+        right: 4px;
+      }
+
+      .rule {
+        padding: 12px;
+        border-radius: 18px;
+      }
+
+      .toast {
+        max-width: calc(100% - 24px);
+        white-space: normal;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .wrap {
+        width: calc(100vw - 6px);
+      }
+
+      .bingo-grid {
+        gap: 3px;
+      }
+
+      .card-shell {
+        padding: 3px;
+      }
+
+      .square {
+        min-height: 68px;
+        font-size: clamp(8.2px, 2.75vw, 10px);
+        padding: 4px 2px;
+        border-radius: 9px;
+      }
+
+      .head-cell {
+        min-height: 30px;
+        font-size: 16px;
+        border-radius: 9px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+      .gingham, .floating, .panel, .rules, .toast {
+        display: none !important;
+      }
+      .wrap {
+        width: 100%;
+        padding: 0;
+      }
+      .card-shell {
+        box-shadow: none;
+        border: 2px solid #999;
+      }
+      .square, .head-cell {
+        box-shadow: none;
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="gingham"></div>
+  <div class="floating float-1">🐈‍⬛</div>
+  <div class="floating float-2">🧺</div>
+  <div class="floating float-3">🎲</div>
+  <div class="floating float-4">🍓</div>
+
+  <main class="wrap">
+    <header>
+      <div class="kicker">🐾 Picnic Edition · Tap squares to play</div>
+      <h1>B I N G O</h1>
+      <p class="subtitle">
+        Thank you so much for supporting another one of ADHD project & for joining me today 💕 Hope this game will bring people closer or out of their comfort zone!
+      </p>
+      <div class="hero-emojis" aria-hidden="true">🐈‍⬛ 🧺 🍓 🎲 🌷</div>
+    </header>
+
+    <section class="panel" aria-label="Bingo controls">
+      <div class="controls">
+        <div>
+          <label for="playerName">Your picnic name</label>
+          <input id="playerName" placeholder="ex: Lina, Micah’s Favorite Human, Snack Goblin..." autocomplete="off" />
+        </div>
+        <button id="generateBtn">Generate My Board</button>
+        <button id="randomBtn" class="secondary">Surprise Me</button>
+      </div>
+
+      <div class="status-row">
+        <div id="statusText">Enter a name for a personalized board, or tap “Surprise Me.”</div>
+        <div class="status-actions">
+          <button id="shareBtn" class="ghost">Copy Link</button>
+          <button id="resetBtn" class="ghost">Reset Checks</button>
+          <button id="printBtn" class="ghost">Print</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-shell" aria-label="Bingo card">
+      <div id="bingoGrid" class="bingo-grid"></div>
+    </section>
+
+    <section id="winner" class="winner" aria-live="polite">
+    BINGO! You are officially the Main Character of the Picnic. ✨
+    <img id="winnerImage" src="" alt="Winner Celebration" style="display: none; margin-top: 10px; max-width: 100%; border-radius: 12px;" />
+    </section>
+
+    <section class="rules" aria-label="How to play">
+      <div class="rule">
+        <strong>🌷 How to play</strong>
+        <span>Tap a square when it happens OR if you hear someone say it. Five in a row wins: across, down, or diagonal.</span>
+      </div>
+      <div class="rule">
+        <strong>🐈 Friend boards</strong>
+        <span>Each name creates a different board. Same name = same board, so your progress can save.</span>
+      </div>
+      <div class="rule">
+        <strong>🧺 Picnic prize</strong>
+        <span>First bingo gets a tiny snack/trinket. Blackout board gets legendary picnic status.</span>
+      </div>
+    </section>
+
+    <footer>
+
+    </footer>
+  </main>
+
+  <div id="toast" class="toast">Copied!</div>
+
+  <script>
+    const bingoItems = [
+      "“I’m just vibing”",
+      "Trader Joe’s snack",
+      "A cat photo is shown unsolicited",
+      "“Wait, let me take a picture first”",
+      "Someone starts ranking board games seriously",
+      "Linen top/bottom",
+      "“Gym”",
+      "Matcha",
+      "Won a board/card game",
+      "Meet atleast 2 New Yorkers",
+      "Someone carrying Lactaid",
+      "Someone mentions anime",
+      "Someone uses the phrase “energy” as a noun",
+      "A drink in a cute bottle",
+      "A tote bag appears",
+      "“I don’t usually go outside”",
+      "Someone accidentally trauma dumps a little",
+      "Someone brings an Asian snack",
+      "“N/W Train”",
+      "“Wedding”",
+      "“Greek”",
+      "A conversation becomes weirdly philosophical",
+      "“just one more round”",
+      "Spot atleast 2 keychains on a bag",
+      "“I saw this on TikTok or IG”",
+      "Someone lies down dramatically on the blanket",
+      "Someone mentions ADHD",
+      "Someone makes a hyper-specific food recommendation",
+      "“this would heal me”",
+      "Someone gets overly competitive",
+      "Someone brought an emotional support drink",
+      "Someone pulls out sunscreen like the mom friend",
+      "“software engineer”",
+      "“Zohran”",
+      "“AI”",
+      "Meet someone allergic to a fruit",
+      "Someone brought a snack that needed an explanation"
+    ];
+    
+    const headers = ["🐾 B", "🧺 I", "🌷 N", "☁️ G", "🍓 O"];
+    const grid = document.getElementById("bingoGrid");
+    const nameInput = document.getElementById("playerName");
+    const generateBtn = document.getElementById("generateBtn");
+    const randomBtn = document.getElementById("randomBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const shareBtn = document.getElementById("shareBtn");
+    const printBtn = document.getElementById("printBtn");
+    const statusText = document.getElementById("statusText");
+    const winner = document.getElementById("winner");
+    const toast = document.getElementById("toast");
+
+    let currentName = "Micah's Friend";
+    let board = [];
+    let checked = new Set();
+
+    function hashString(str) {
+      let h = 2166136261;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+      }
+      return h >>> 0;
+    }
+
+    function seededRandom(seed) {
+      let x = seed || 123456789;
+      return function() {
+        x += 0x6D2B79F5;
+        let t = x;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    function shuffleWithSeed(array, seed) {
+      const copy = array.slice();
+      const rand = seededRandom(seed);
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function storageKey(name) {
+      return "soft-chaos-picnic-bingo::" + name.trim().toLowerCase();
+    }
+
+    function createBoard(name) {
+      const seed = hashString(name.trim().toLowerCase() || "picnic friend");
+      const shuffled = shuffleWithSeed(bingoItems, seed);
+      const selected = shuffled.slice(0, 24);
+      selected.splice(12, 0, "FREE SPACE ☁️");
+      return selected;
+    }
+
+    function loadChecked(name) {
+      try {
+        const saved = localStorage.getItem(storageKey(name));
+        checked = new Set(saved ? JSON.parse(saved) : [12]);
+      } catch {
+        checked = new Set([12]);
+      }
+      checked.add(12);
+    }
+
+    function saveChecked() {
+      localStorage.setItem(storageKey(currentName), JSON.stringify([...checked]));
+    }
+
+    function renderBoard() {
+      grid.innerHTML = "";
+
+      headers.forEach(label => {
+        const head = document.createElement("div");
+        head.className = "head-cell";
+        head.textContent = label;
+        grid.appendChild(head);
+      });
+
+      board.forEach((text, i) => {
+        const square = document.createElement("button");
+        square.type = "button";
+        square.className = "square";
+        square.textContent = text;
+        square.setAttribute("aria-pressed", checked.has(i) ? "true" : "false");
+
+        if (i === 12) square.classList.add("free");
+        if (checked.has(i)) square.classList.add("checked");
+
+        square.addEventListener("click", () => {
+          if (i === 12) return;
+          if (checked.has(i)) checked.delete(i);
+          else checked.add(i);
+          saveChecked();
+          renderBoard();
+          checkBingo(true);
+        });
+
+        grid.appendChild(square);
+      });
+
+      checkBingo(false);
+    }
+
+    function checkBingo(announce) {
+      const lines = [
+        [0,1,2,3,4],
+        [5,6,7,8,9],
+        [10,11,12,13,14],
+        [15,16,17,18,19],
+        [20,21,22,23,24],
+        [0,5,10,15,20],
+        [1,6,11,16,21],
+        [2,7,12,17,22],
+        [3,8,13,18,23],
+        [4,9,14,19,24],
+        [0,6,12,18,24],
+        [4,8,12,16,20]
+      ];
+
+      const hasBingo = lines.some(line => line.every(i => checked.has(i)));
+      winner.classList.toggle("show", hasBingo);
+
+      const count = [...checked].filter(i => i !== 12).length;
+      statusText.textContent = `${currentName}'s board · ${count}/24 squares checked`;
+
+      if (hasBingo && announce) {
+        confetti();
+        showToast("BINGO! Main Character of the Picnic ✨");
+
+  // Display the winner image dynamically
+      const winnerImage = document.getElementById("winnerImage");
+        winnerImage.src = "D1581512-A69D-4BE8-8CC8-F22959443C1F.png"; // Add the correct image path here
+        winnerImage.style.display = "block";
+      }
+    }
+
+    function generate(name, updateUrl = true) {
+      currentName = (name || "Picnic Friend").trim() || "Picnic Friend";
+      nameInput.value = currentName;
+      board = createBoard(currentName);
+      loadChecked(currentName);
+
+      if (updateUrl) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("name", currentName);
+        window.history.replaceState({}, "", url);
+      }
+
+      renderBoard();
+    }
+
+    function randomName() {
+      const starts = ["Snack", "Picnic", "Baddie", "Spicy", "Cat", "Soft", "Board Game", "Vibe", "Pastel", "Blanket", "Niche Snack", "Main Character"];
+      const ends = ["Goblin", "Rat", "Fairy", "Gremlin", "Angel", "Champion", "Archivist", "Duchess", "Raccoon", "Sage", "Menace"];
+      return starts[Math.floor(Math.random() * starts.length)] + " " + ends[Math.floor(Math.random() * ends.length)];
+    }
+
+    function resetChecks() {
+      checked = new Set([12]);
+      saveChecked();
+      renderBoard();
+      showToast("Board reset ☁️");
+    }
+
+    async function copyLink() {
+      const url = new URL(window.location.href);
+      url.searchParams.set("name", currentName);
+      try {
+        await navigator.clipboard.writeText(url.toString());
+        showToast("Link copied 🧺");
+      } catch {
+        showToast("Copy did not work — use your browser share button");
+      }
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function confetti() {
+      const colors = ["#ffdce8", "#fff0b7", "#d9ccff", "#dcf7ec", "#dff1ff", "#e99ab8"];
+      for (let i = 0; i < 54; i++) {
+        const piece = document.createElement("div");
+        piece.className = "confetti";
+        piece.style.left = Math.random() * 100 + "vw";
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = Math.random() * .25 + "s";
+        piece.style.transform = `rotate(${Math.random() * 180}deg)`;
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 1500);
+      }
+    }
+
+    generateBtn.addEventListener("click", () => generate(nameInput.value));
+    randomBtn.addEventListener("click", () => generate(randomName()));
+    resetBtn.addEventListener("click", resetChecks);
+    shareBtn.addEventListener("click", copyLink);
+    printBtn.addEventListener("click", () => window.print());
+    nameInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") generate(nameInput.value);
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    const paramName = params.get("name");
+    generate(paramName || "Picnic Friend", !paramName);
+  </script>
+</body>
+</html>
